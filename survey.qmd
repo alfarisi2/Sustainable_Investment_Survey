@@ -1,0 +1,602 @@
+---
+title: "Investors Characteristics towards Sustainable Investment: A Survey Report"
+author: "Muhammad Farid Salman Alfarisi RM"
+date: last-modified
+format: 
+  html:
+    toc: TRUE
+    toc-title: "Outline"
+    toc-location: left
+    toc-depth: 1
+    number-sections: FALSE
+    fig-width: 7.49
+    fig-height: 5.5
+    css: styles.css
+editor: visual
+code-fold: TRUE
+editor_options: 
+  chunk_output_type: console
+---
+
+# About The Survey
+
+This report is based on a dataset uploaded to [Mendeley Data](https://data.mendeley.com/). Here is the full description:
+
+::: callout-note
+## Description
+
+The data was collected through a structured questionnaire. Twelve municipal corporations and eleven village *panchayats* of Tamil Nadu were selected for collecting the data. The questionnaire also elicits information on the demographic profile of the respondents. The national and international existing literature on investors’ investment decision towards the sustainable investment was reviewed for developing the questionnaire. The questionnaire was also scrutinized by a panel of subject experts and statisticians. The questions in the questionnaire are sequentially arranged and the questions are asked in a simple and understandable manner. The respondents are first educated about the purpose of the study and assurance of confidentiality of the data is given to them. The survey has used different scales to measure the demographic profiles and investors’ characteristics towards the sustainable investments. In the first section of the questionnaire namely demographic/socio economic profile of the investors, nominal and ordinal scales are used. The second sections of the questionnaire, the questions are asked in the format of five-point Likert scale with 5 meaning “Strongly Agree”, 4 indicating “Agree”, 3 indicating “Neither Agree nor disagree”, 2 meaning “Disagree” and 1 indicating “Strongly Disagree.
+:::
+
+Reference:
+
+C, Hariharan (2022), “Investors Characteristics towards Sustainable Investment”, Mendeley Data, V1, DOI: [10.17632/pm6ks8k59x.1](https://data.mendeley.com/datasets/pm6ks8k59x/1) - CC BY 4.0 licence
+
+For the report's full codes and the report's author profile, please click the icons below:
+
+ <span style="color: Mediumslateblue;"><a href="https://github.com/alfarisi2" target="_blank">{{< fa brands github>}}</a></span>
+<span style="color: Mediumslateblue;"><a href="https://www.linkedin.com/in/muhammad-farid-salman-alfarisi-rm/" target="_blank">{{< fa brands linkedin>}}</a></span>
+
+# Survey Location
+
+```{r}
+#| include: false
+
+#| message: false
+#| warning: false
+
+library(sf)
+library(tidyverse)
+library(leaflet)
+library(htmltools)
+library(readxl)
+library(skimr)
+library(RColorBrewer)
+library(gtsummary)
+library(gt)
+library(patchwork)
+library(likert)
+library(xtable)
+library(kableExtra)
+
+setwd("D:/dataset/mendeley/inveschar/pm6ks8k59x-1/pm6ks8k59x-1")
+
+geo_data <- st_read("TAMIL NADU_STATE.geojson")
+```
+
+```{r}
+#| message: false
+#| warning: false
+
+m <- leaflet(geo_data) |> 
+  setView(lng = 78, lat = 10, zoom = 5) |> 
+  addProviderTiles("CartoDB.Positron") |> 
+  addPolygons(
+    fillColor = "lightgreen",  # Use a single color for all states
+    weight = 1,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = ~STNAME,  # Show state names on hover
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")
+  )
+
+m
+
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+rawdata = read_xls("Sustainable Data.xls")
+glimpse(rawdata)
+skim(rawdata)
+
+cat_data <- rawdata |> 
+  mutate_if(is.numeric, as.factor)
+
+glimpse(cat_data)                          
+
+cat_data$Area
+cat_data$SIMN1
+
+cat_data <- 
+  cat_data |> 
+  mutate(Area = fct_recode(Area, 
+                           "Rural" = "1",
+                           "Urban" = "2"),
+        Gender = fct_recode(Gender,
+                             "Male" = "1",
+                             "Female" = "2"),
+         Age = fct_recode(Age,
+                          "< 20" = "1",
+                          "21-29" = "2",
+                          "30-39" = "3",
+                          "40-49" = "4",
+                          "50 >" = "5"),
+         Educationqualification = fct_recode(Educationqualification,
+                                             "School Level" = "1",
+                                             "Diploma/ITI" = "2",
+                                             "Undergraduate" = "3",
+                                             "Postgraduate" = "4",
+                                             "Professional Degree" = "5"),
+         Occupation = fct_recode(Occupation,
+                                 "Business" = "1",
+                                 "Government Employee" = "2",
+                                 "Private Employee" = "3",
+                                 "Farmer" = "4",
+                                 "Retired" = "5"),
+         MonthlyIncome = fct_recode(MonthlyIncome,
+                                    "Up to 10,000" = "1",
+                                    "10,001-20,000" = "2",
+                                    "20,001-30,000" = "3",
+                                    "30,001-40,000" = "4",
+                                    "40,001-50,000" = "5",
+                                    "Above 50,000" = "6"),
+         HouseholdIncome = fct_recode(HouseholdIncome,
+                                      "Up to 10,000" = "1",
+                                      "10,001-20,000" = "2",
+                                      "20,001-30,000" = "3",
+                                      "30,001-40,000" = "4",
+                                      "40,001-50,000" = "5",
+                                      "Above 50,000" = "6"),
+         Natureoffamily = fct_recode(Natureoffamily,
+                                     "Nuclear" = "1",
+                                     "Joint" = "2"),
+         Monthlysavingpercentage = fct_recode(MonthlyIncome,
+                                              "1%-5%" = "1",
+                                              "6%-10%" = "2",
+                                              "11%-15%" = "3",
+                                              "16%-20%" = "4",
+                                              "More than 20%" = "5"))
+```
+
+# Participants by Categories
+
+```{r}
+#| message: true
+#| warning: true
+#| include: false
+gender <- cat_data |> group_by(Gender) |> 
+  summarise(N = n()) |> 
+  mutate(Percentage = round((N / sum(N)) * 100, 2))
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+gender |>
+  kbl(booktabs = TRUE, caption = "Participants by Gender") |> 
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "bordered", "hover"), 
+                font_size = 14) |>
+  row_spec(0, bold = TRUE)
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+age <- cat_data |> group_by(Age) |> 
+  summarise(N = n()) |> 
+  mutate(Percentage = round((N / sum(N)) * 100, 2))
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+age |>
+  kbl(booktabs = TRUE, caption = "Participants by Age") |> 
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "bordered", "hover"), 
+                font_size = 14) |>
+  row_spec(0, bold = TRUE) # Make column names bold
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+edu <- 
+  cat_data |> group_by(Educationqualification) |> 
+  summarise(N = n()) |> 
+  mutate(Percentage = round((N / sum(N)) * 100, 2))
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+edu |>
+  kbl(booktabs = TRUE, caption = "Participants by Education") |> 
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "bordered", "hover"), 
+                font_size = 14) |>
+  row_spec(0, bold = TRUE) # Make column names bold
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+occup  <- 
+  cat_data |> group_by(Occupation) |> 
+  summarise(N = n()) |> 
+  mutate(Percentage = round((N / sum(N)) * 100, 2))
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+occup |>
+  kbl(booktabs = TRUE, caption = "Participants by Occupation") |> 
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "bordered", "hover"), 
+                font_size = 14) |>
+  row_spec(0, bold = TRUE) # Make column names bold
+
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+HouseIn <- 
+  cat_data |> group_by(HouseholdIncome) |> 
+  summarise(N = n()) |> 
+  mutate(Percentage = round((N / sum(N)) * 100, 2))
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+HouseIn |>
+  kbl(booktabs = TRUE, caption = "Participants by Household Income") |> 
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "bordered", "hover"), 
+                font_size = 14) |>
+  row_spec(0, bold = TRUE) # Make column names bold
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+Monthlysave <- 
+  cat_data |> group_by(Monthlysavingpercentage) |> 
+  summarise(N = n()) |> 
+  mutate(Percentage = round((N / sum(N)) * 100, 2))
+```
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+#| include: false
+Monthlysave |>
+  kbl(booktabs = TRUE, caption = "Participants by Monthly Saving") |> 
+  kable_styling(full_width = FALSE, 
+                bootstrap_options = c("striped", "bordered", "hover"), 
+                font_size = 14) |>
+  row_spec(0, bold = TRUE) # Make column names bold
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+
+knitr::opts_chunk$set(fig.width = 8, fig.height = 6) # Width and height in inches
+
+partic_education <- 
+  cat_data|> 
+  ggplot(aes(x = Educationqualification,
+             fill = Educationqualification)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Set2")+
+  ggtitle("Participants by Education") +
+  theme(legend.position = "none") +
+  labs(x = NULL, y = NULL) +
+  coord_flip()
+
+partic_occupation <- 
+  cat_data |> 
+  ggplot(aes(x = Occupation, fill = Occupation)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Set3")+
+  ggtitle("Participants by Occupation") +
+  theme(legend.position = "none") +
+  labs(x = NULL, y = NULL) +
+  coord_flip()
+
+partic_age <- 
+  cat_data |> 
+  ggplot(aes(x = Age, fill = Age)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Dark2")+
+  ggtitle("Participants by Age") +
+  labs(x = NULL, y = NULL) +
+  theme(legend.position = "none")
+
+partic_gender <- 
+  cat_data |> 
+  ggplot(aes(x = Gender, fill = Gender)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Accent")+
+  ggtitle("Participants by Gender") +
+  labs(x = NULL, y = NULL) +
+  theme(legend.position = "none")
+
+partic_area <- 
+  cat_data |> 
+  ggplot(aes(x = Area, fill = Area)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Pastel1")+
+  ggtitle("Participants by Area") +
+  labs(x = NULL, y = NULL) +
+  theme(legend.position = "none")
+
+partic_houseincome <- 
+  cat_data |> 
+  ggplot(aes(x = HouseholdIncome, fill = HouseholdIncome)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "BrBG")+
+  ggtitle("Participants by Household Income") +
+  theme(legend.position = "none") +
+  labs(x = NULL, y = NULL) +
+  coord_flip()
+
+partic_saving <- 
+  cat_data |> 
+  ggplot(aes(x = Monthlysavingpercentage, fill = Monthlysavingpercentage)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Set1")+
+  ggtitle("Participants by Monthy Saving") + 
+  theme(legend.position = "none") + 
+  labs(x = NULL, y = NULL) + 
+  coord_flip()
+
+```
+
+```{r}
+#| message: false
+#| warning: false
+(partic_gender | partic_area) / partic_age
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| results: 'hide'
+partic_education +  partic_occupation + partic_houseincome + partic_saving + plot_layout(ncol = 2)
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+likert_labels <- c("Strongly Agree", "Agree", "Neutral", "Disagree", "Strongly Disagree")
+
+likert_columns <- 10:ncol(cat_data)
+
+for (col in likert_columns) {
+  levels(cat_data[[col]]) <- likert_labels
+}
+
+
+
+questions <- cat_data[, 10:39]
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+allquest <- tbl_summary(
+  data = questions,
+  label = list(SIDMB1 ~ "1. I consider social responsibility aspects, whenever I am choosing an investment", 
+               SIDMB2 ~ "2. Investing socially responsible is something that I have done", 
+               SIDMB3 ~ "3. I prefer investing in funds/shares that comply with sustainable development, which are consistent with ethics, social, economic development",
+               SIDMB4 ~ "4. I am always satisfied with invest in formal investment as well as sustainable investment",
+               SIDMB5 ~ "5. I believe that my investment does have a positive impact on the economic development",
+               SIInt1 ~ "6. I am happy to invest in socially responsible investments",
+               SIInt2 ~ "7. Sustainable investment develop my family status",
+               SIInt3 ~ "8. It will help my child’s future",
+               SIInt4 ~ "9. It is responsible and sustainable and hence I invest",
+               SIInt5 ~ "10. It will help my retirement",
+               SIAtt1 ~ "11. Investments are good for the economy",
+               SIAtt2 ~ "12. Sustainable investment would allow me to gain, without unnecessarily harming the society or economy",
+               SIAtt3 ~ "13. It gives more benefit to our country as well as my family",
+               SIAtt4 ~ "14. Financial inclusion schemes give opportunity to access all the financial services",
+               SIAtt5 ~ "15. I promote economic development through my investment decisions",
+               SISN1 ~ "16. Family members and friends motivate me to invest in sustainable investments",
+               SISN2 ~ "17. Financial experts and agents of financial institutions provide the required information about traditional investment and sustainable investments",
+               SISN3 ~ "18. Financial literacy programmes of various investment avenues provide sufficient knowledge about particular investment",
+               SISN4 ~ "19. Media like, news paper, magazine, TV, ratio and mobile provided the investment knowledge",
+               SISN5 ~ "20. Co-workers encouraged me to invest in sustainable investments ",
+               SIPBC1 ~ "21. I believe I have the ability to invest in socially responsible investment schemes",
+               SIPBC2 ~ "22. I have plenty of opportunity to invest in socially responsible investment schemes",
+               SIPBC3 ~ "23. All the financial inclusion schemes will help to improve my financial status",
+               SIPBC4 ~ "24. If it were entirely up to me, I am confident that I will invest in any investment",
+               SIPBC5 ~ "25. I have resources, time and willingness to invest in various investments",
+               SIMN1 ~ "26. I have some personal principles towards investing my money",
+               SIMN2 ~ "27. My investments are responsible to all",
+               SIMN3 ~ "28. All the investments are created by the rules and regulations of particular authorities and hence I invest",
+               SIMN4 ~ "29. There are no speculations in the financial inclusion schemes",
+               SIMN5 ~ "30. Financial inclusion schemes economically help to develop our country ")
+)
+
+
+
+```
+
+# All Questions and Responses
+
+```{r}
+#| message: false
+#| warning: false
+
+allquest |> modify_header(label = "**Questions**") |> 
+  as_kable()
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+cat_data2 <- as.data.frame(cat_data)
+
+plot(likert(cat_data2[, c(10:14)], grouping = cat_data2[, 1]), legend.position = "right")
+
+cat_data3 <- cat_data2 |> 
+  rename("1. I consider social responsibility aspects, whenever I am choosing an investment" = SIDMB1, 
+         "2. Investing socially responsible is something that I have done" = SIDMB2, 
+         "3. I prefer investing in funds/shares that comply with sustainable development, which are consistent with ethics, social, economic development" = SIDMB3,
+         "4. I am always satisfied with invest in formal investment as well as sustainable investment" = SIDMB4,
+         "5. I believe that my investment does have a positive impact on the economic development" = SIDMB5,
+         "6. I am happy to invest in socially responsible investments" = SIInt1,
+         "7. Sustainable investment develop my family status" = SIInt2,
+         "8. It will help my child’s future" = SIInt3,
+         "9. It is responsible and sustainable and hence I invest" = SIInt4,
+         "10. It will help my retirement" = SIInt5,
+         "11. Investments are good for the economy" = SIAtt1,
+         "12. Sustainable investment would allow me to gain, without unnecessarily harming the society or economy" = SIAtt2,
+         "13. It gives more benefit to our country as well as my family" = SIAtt3,
+         "14. Financial inclusion schemes give opportunity to access all the financial services" = SIAtt4,
+         "15. I promote economic development through my investment decisions" = SIAtt5,
+         "16. Family members and friends motivate me to invest in sustainable investments" = SISN1,
+         "17. Financial experts and agents of financial institutions provide the required information about traditional investment and sustainable investments" = SISN2,
+         "18. Financial literacy programmes of various investment avenues provide sufficient knowledge about particular investment" = SISN3,
+         "19. Media like, news paper, magazine, TV, ratio and mobile provided the investment knowledge" = SISN4,
+         "20. Co-workers encouraged me to invest in sustainable investments " = SISN5,
+         "21. I believe I have the ability to invest in socially responsible investment schemes" = SIPBC1,
+         "22. I have plenty of opportunity to invest in socially responsible investment schemes" = SIPBC2,
+         "23. All the financial inclusion schemes will help to improve my financial status" = SIPBC3,
+         "24. If it were entirely up to me, I am confident that I will invest in any investment" = SIPBC4,
+         "25. I have resources, time and willingness to invest in various investments" = SIPBC5,
+         "26. I have some personal principles towards investing my money" = SIMN1,
+         "27. My investments are responsible to all" = SIMN2,
+         "28. All the investments are created by the rules and regulations of particular authorities and hence I invest" = SIMN3,
+         "29. There are no speculations in the financial inclusion schemes" = SIMN4,
+         "30. Financial inclusion schemes economically help to develop our country " = SIMN5)
+
+```
+
+# Responses by Area
+
+The graphs below depict the responses based on area only. To show all of the responses from different categories will take much longer page.
+
+```{r}
+#| message: false
+#| warning: false
+
+knitr::opts_chunk$set(fig.width = 11, fig.height = 10) 
+
+occu_answer <- 
+  plot(likert(cat_data3[, c(10:14)],
+            grouping = cat_data3[, 1]), #area
+     centered = FALSE,
+     plot.percent.low = FALSE, plot.percent.high = FALSE, plot.percent.neutral = FALSE,
+     legend.position = "right") +
+  scale_fill_manual(values = brewer.pal(n=5, "Paired")) +
+  guides(fill = guide_legend(title = "Responses")) +
+  ggtitle("Opinion regarding your investment behaviour towards sustainable investment") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+print(occu_answer)
+
+occu_answer1 <- 
+  plot(likert(cat_data3[, c(15:19)],
+              grouping = cat_data3[, 1]),
+       centered = FALSE,
+       plot.percent.low = FALSE, plot.percent.high = FALSE, plot.percent.neutral = FALSE,
+       legend.position = "right") +
+  scale_fill_manual(values = brewer.pal(n=5, "Paired")) +
+  guides(fill = guide_legend(title = "Responses")) +
+  ggtitle("Opinion regarding your intention towards sustainable investment") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+print(occu_answer1)
+
+occu_answer2 <- 
+  plot(likert(cat_data3[, c(20:24)],
+              grouping = cat_data3[, 1]),
+       centered = FALSE,
+       plot.percent.low = FALSE, plot.percent.high = FALSE, plot.percent.neutral = FALSE,
+       legend.position = "right") +
+  scale_fill_manual(values = brewer.pal(n=5, "Paired")) +
+  guides(fill = guide_legend(title = "Responses")) +
+  ggtitle("Opinion regarding your attitude towards sustainable investment") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+print(occu_answer2)
+
+occu_answer3 <- 
+  plot(likert(cat_data3[, c(25:29)],
+              grouping = cat_data3[, 1]),
+       centered = FALSE,
+       plot.percent.low = FALSE, plot.percent.high = FALSE, plot.percent.neutral = FALSE,
+       legend.position = "right") +
+  scale_fill_manual(values = brewer.pal(n=5, "Paired")) +
+  guides(fill = guide_legend(title = "Responses")) +
+  ggtitle("Opinion regarding your subjective norms towards sustainable investment") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+print(occu_answer3)
+
+occu_answer4 <- 
+  plot(likert(cat_data3[, c(30:34)],
+              grouping = cat_data3[, 1]),
+       centered = FALSE,
+       plot.percent.low = FALSE, plot.percent.high = FALSE, plot.percent.neutral = FALSE,
+       legend.position = "right") +
+  scale_fill_manual(values = brewer.pal(n=5, "Paired")) +
+  guides(fill = guide_legend(title = "Responses")) +
+  ggtitle("Opinion regarding your perceived behavioural control towards sustainable investment") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+print(occu_answer4)
+
+occu_answer5 <- 
+  plot(likert(cat_data3[, c(35:39)],
+              grouping = cat_data3[, 1]),
+       centered = FALSE,
+       plot.percent.low = FALSE, plot.percent.high = FALSE, plot.percent.neutral = FALSE,
+       legend.position = "right") +
+  scale_fill_manual(values = brewer.pal(n=5, "Paired")) +
+  guides(fill = guide_legend(title = "Responses")) +
+  ggtitle("Opinion regarding your moral norms towards sustainable investment") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+print(occu_answer5)
+
+
+```
+
+``` HTML
+```
